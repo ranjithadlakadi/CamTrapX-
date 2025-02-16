@@ -13,3 +13,6 @@
 ✅ Demonstrates real-time **privacy risks**.  
 ✅ Open-source and free to use for **ethical hacking awareness**.  
 
+⚡ Live Demo
+
+🔹 Here is a live website demo link so you can see how this tool works in real-time: https://connectwithstrangers.com/

